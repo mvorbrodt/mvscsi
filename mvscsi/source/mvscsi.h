@@ -15,10 +15,11 @@ extern "C" {
 
 #define mvSCSI_OK               0x00
 #define mvSCSI_NO_INIT          0x01
-#define mvSCSI_CHECK            0x02
-#define mvSCSI_ERROR            0x03
-#define mvSCSI_NO_BUS           0x04
-#define mvSCSI_NO_DEV           0x05
+#define mvSCSI_ERROR            0x02
+#define mvSCSI_CHECK            0x03
+#define mvSCSI_PENDING          0x04
+#define mvSCSI_NO_BUS           0x05
+#define mvSCSI_NO_DEV           0x06
 
 #define mvSCSI_MAX_BUS          0xFF
 #define mvSCSI_MAX_PATH         0x02
@@ -27,6 +28,10 @@ extern "C" {
 
 #define mvSCSI_MAX_CDB_LEN      0x10
 #define mvSCSI_MAX_SENSE_LEN    0x12
+
+#define mvSCSI_EVENT_NOTIFY     0x00
+#define mvSCSI_POSTING          0x01
+#define mvSCSI_POLLING          0x02
 
 #define mvSCSI_DATA_OUT         0x00
 #define mvSCSI_DATA_IN          0x01
@@ -73,7 +78,10 @@ typedef struct {
 	BYTE   cmdDataDir;
 	DWORD  cmdBufLen;
 	LPVOID cmdBufPtr;
+	BYTE   cmdPostFlag;
+	LPVOID cmdPostProc;
 	BYTE   cmdStatus;
+	BYTE   cmdSCSIStatus;
 } mvSCSI_Cmd, *PmvSCSI_Cmd, FAR *LPmvSCSI_Cmd;
 
 #ifdef _mvSCSIEXPORTING_

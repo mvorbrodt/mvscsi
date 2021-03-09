@@ -53,13 +53,14 @@ typedef struct {
 	BYTE revision[4];
 } InquiryData;
 
-#ifdef __BORLANDC__
-#pragma option -a.
-#endif
-
-#ifdef _MSC_VER
-#pragma pack(pop)
-#endif
+/* ******************* */
+/* * POSTING EXAMPLE * */
+/* ******************* */
+HANDLE callbackEvent;
+void mvSCSI_Callback(LPmvSCSI_Cmd cmd) {
+	SetEvent(callbackEvent);
+}
+/* ******************* */
 
 int main() {
 	DWORD status         = mvSCSI_Init();
@@ -112,7 +113,44 @@ int main() {
 							cmd.cmdBufLen   = sizeof(inqData);
 							cmd.cmdBufPtr   = &inqData;
 
-							if(mvSCSI_ExecCmd(&cmd) == mvSCSI_OK) {
+							/* ************************ */
+							/* * EVENT NOTIFY EXAMPLE * */
+							/* ************************ */
+							HANDLE event = CreateEvent(NULL, TRUE, FALSE, NULL);
+							ResetEvent(event);
+
+							cmd.cmdPostFlag = mvSCSI_EVENT_NOTIFY;
+							cmd.cmdPostProc = (LPVOID)event;
+
+							if(mvSCSI_ExecCmd(&cmd) == mvSCSI_PENDING) {
+								WaitForSingleObject(event, INFINITE);
+								CloseHandle(event);
+							}
+							/* ************************ */
+
+							/* ******************* */
+							/* * POSTING EXAMPLE * */
+							/* ******************* *
+							callbackEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+							ResetEvent(callbackEvent);
+
+							cmd.cmdPostFlag = mvSCSI_POSTING;
+							cmd.cmdPostProc = mvSCSI_Callback;
+							mvSCSI_ExecCmd(&cmd);
+
+							WaitForSingleObject(callbackEvent, INFINITE);
+							CloseHandle(callbackEvent);
+							/* ************************ */
+
+							/* ******************* */
+							/* * POLLING EXAMPLE * */
+							/* ******************* *
+							cmd.cmdPostFlag = mvSCSI_POLLING;
+							mvSCSI_ExecCmd(&cmd);
+							while(cmd.cmdStatus == mvSCSI_PENDING) { Sleep(1); }
+							/* ************************ */
+
+							if(cmd.cmdStatus == mvSCSI_OK) {
 								cout << "\t[" << inqData.manufacturer << "]" << endl << endl;
 							}
 						}
@@ -125,3 +163,11 @@ int main() {
 
 	return 0;
 }
+
+#ifdef __BORLANDC__
+#pragma option -a.
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif

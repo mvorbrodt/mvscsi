@@ -2,8 +2,8 @@ mvSCSI for Windows NT/2K/XP
 Copyright (c) 2006, Martin Vorbrodt
 -----------------------------------
 
-Version: 1.1
-Date:    02-27-2006
+Version: 1.2
+Date:    03-28-2006
 
 
 
@@ -11,13 +11,16 @@ Overview
 --------
 
 mvSCSI is a simple C API for programming SCSI devices under Windows NT/2K/XP.
-It was developed using C and C++. It represents my (hopefully successful) effort
-to make SCSI programming somewhat easier for the average Joes like myself :)
+It was developed using C and C++, and inspired by simplicity of ASPI.
+It represents my (hopefully successful) effort to make SCSI programming
+somewhat easier for the average Joes like myself :)
 
 In order to compile, you will need Boost 1.33.1 and Windows Server 2K3 SP1 DDK.
 All structures must be packed (byte alignment), or else... world of undefined.
-mvSCSI is not thread safe :( but an easy fix is possible: put a mutex lock
-on all functions in source/mvscsi.cpp.
+mvSCSI is now thread safe: internal mutex is used to synchronize all function
+calls, see source/mvscsi.cpp. mvSCSI also supports asynchronous execution of
+SCSI commands. Notification is done through Win32 events, callback functions,
+or variable polling. See source/mvscsitest.cpp for example of each technique.
 
 Enjoy!
 
@@ -33,11 +36,14 @@ mvSCSI_NO_INIT - Returned by all mvSCSI functions except mvSCSI_Init.
                  Indicates that mvSCSI has not been initialized yet.
                  Call mvSCSI_Init to initialize mvSCSI.
 
+mvSCSI_ERROR   - Returned by mvSCSI_Init, mvSCSI_RescanBus, mvSCSI_ExecCmd.
+                 Indicates internal system error (SPTI, memory allocation, etc).
+
 mvSCSI_CHECK   - Returned by mvSCSI_ExecCmd. Indicates CHECK CONDITION
                  status was returned from SCSI device and/or controller.
 
-mvSCSI_ERROR   - Returned by mvSCSI_Init, mvSCSI_RescanBus, mvSCSI_ExecCmd.
-                 Indicates internal system error (SPTI, memory allocation, etc).
+mvSCSI_PENDING - Returned by mvSCSI_ExecCmd. Indicates that SCSI request
+                 has not completed yet.
 
 mvSCSI_NO_BUS  - Returned by mvSCSI_Init, mvSCSI_RescanBus, and mvSCSI_InquiryBus.
                  Indicates that the specified SCSI bus does not exist or that
@@ -59,6 +65,10 @@ mvSCSI_MAX_LUN          - Maximum number of SCSI luns on a target.
 
 mvSCSI_MAX_CDB_LEN      - Maxumum length of CDB structure.
 mvSCSI_MAX_SENSE_LEN    - Maximum length of sense data.
+
+mvSCSI_EVENT_NOTIFY     - Use Win32 event notification.
+mvSCSI_POSTING          - Use callback for notification.
+mvSCSI_POLLING          - Use variable polling for notification.
 
 mvSCSI_DATA_OUT         - Data direction from controller to target.
 mvSCSI_DATA_IN          - Data direction from target to controller.
@@ -96,8 +106,7 @@ Output fields:
         DWORD busAlignmentMask;
     } mvSCSI_Bus, *PmvSCSI_Bus, FAR *LPmvSCSI_Bus;
 
-mvSCSI_Dev structure is used for device inquiry, setting device timeout,
-and executing SCSI command for a particular device.
+mvSCSI_Dev structure is used for device inquiry and setting device timeout.
 Input fields:
     devBus    - Bus part of the device address.
     devPath   - Path part of the device address.
@@ -129,9 +138,13 @@ Input fields:
     cmdDataDir  - Data direction.
     cmdBufLen   - Length of data buffer.
     cmdBufPtr   - Pointer to data buffer.
+    cmdPostFlag - Type of notification to use (see "mvSCSI Predefined Values").
+    cmdPostProc - Address of callback OR address of EVENT to be signaled.
+                  Callback function signature: void (*)(LPmvSCSI_Cmd).
 Output fields:
-    cmdSense  - Array, bytes of sense data.
-    cmdStatus - SCSI status code.
+    cmdSense      - Array, bytes of sense data.
+    cmdStatus     - mvSCSI status code.
+    cmdSCSIStatus - SCSI status code.
 
     typedef struct {
         BYTE   devBus;
@@ -145,7 +158,10 @@ Output fields:
         BYTE   cmdDataDir;
         DWORD  cmdBufLen;
         LPVOID cmdBufPtr;
+        BYTE   cmdPostFlag;
+        LPVOID cmdPostProc;
         BYTE   cmdStatus;
+        BYTE   cmdSCSIStatus;
     } mvSCSI_Cmd, *PmvSCSI_Cmd, FAR *LPmvSCSI_Cmd;
 
 
@@ -165,6 +181,7 @@ DWORD mvSCSI_InquiryDev(LPmvSCSI_Dev) - Inquiries a given SCSI device.
 DWORD mvSCSI_SetDevTimeOut(LPmvSCSI_Dev) - Sets SCSI device timeout.
 
 DWORD mvSCSI_ExecCmd(LPmvSCSI_Cmd) - Executes a SCSI command on a device.
+                                     This function uses asynchronous execution.
 
 
 
@@ -176,6 +193,8 @@ source/mvscsi.cpp - Main implementation file, puts SPTI wrappers to some use.
 
 source/mvspti.[h/cpp]       - C++ wrapper around SPTI.
 source/mvsptihandle.[h/cpp] - C++ wrapper around HANDLE.
+
+source/mvmutex.h - C++ wrapper around Win32 mutex.
 
 build/mvscsi.exp - Export library for mvSCSI.
 build/mvscsi.lib - Import library for mvSCSI. Linking with it implicitly

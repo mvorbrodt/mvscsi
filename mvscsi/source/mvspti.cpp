@@ -120,7 +120,7 @@ VOID mvSPTI_Dev::ExecCmd(LPmvSCSI_Cmd cmd) {
 	if(!DeviceIoControl(GetHandle(), IOCTL_SCSI_PASS_THROUGH_DIRECT, &sptdwb, sizeof(mvSPTI_SPTDWB), &sptdwb, sizeof(mvSPTI_SPTDWB), &bytesReturnedIO, NULL)) { throw mvSPTI_Error(); }
 
 	memcpy(cmd->cmdSense, sptdwb.senseBuf, cmd->cmdSenseLen > mvSCSI_MAX_SENSE_LEN ? mvSCSI_MAX_SENSE_LEN : cmd->cmdSenseLen);
-	cmd->cmdStatus = sptdwb.sptd.ScsiStatus;
+	cmd->cmdSCSIStatus = sptdwb.sptd.ScsiStatus;
 
 	if(sptdwb.sptd.ScsiStatus) { throw mvSPTI_Check(); }
 }
