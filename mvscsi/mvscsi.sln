@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mvscsi", "mvscsi.vcproj", "{8414C946-6B96-409E-A4D4-7ACF0012B859}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mvscsitest", "..\mvscsitest\mvscsitest.vcproj", "{345F88A7-0CA0-4510-B436-2288D1E4C7F6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8414C946-6B96-409E-A4D4-7ACF0012B859} = {8414C946-6B96-409E-A4D4-7ACF0012B859}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{8414C946-6B96-409E-A4D4-7ACF0012B859}.Debug.ActiveCfg = Debug|Win32
+		{8414C946-6B96-409E-A4D4-7ACF0012B859}.Debug.Build.0 = Debug|Win32
+		{8414C946-6B96-409E-A4D4-7ACF0012B859}.Release.ActiveCfg = Release|Win32
+		{8414C946-6B96-409E-A4D4-7ACF0012B859}.Release.Build.0 = Release|Win32
+		{345F88A7-0CA0-4510-B436-2288D1E4C7F6}.Debug.ActiveCfg = Debug|Win32
+		{345F88A7-0CA0-4510-B436-2288D1E4C7F6}.Debug.Build.0 = Debug|Win32
+		{345F88A7-0CA0-4510-B436-2288D1E4C7F6}.Release.ActiveCfg = Release|Win32
+		{345F88A7-0CA0-4510-B436-2288D1E4C7F6}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
