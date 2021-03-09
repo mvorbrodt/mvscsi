@@ -1,7 +1,6 @@
 mvSCSI for Windows NT/2K/XP
 Copyright (c) 2006, Martin Vorbrodt
 -----------------------------------
-
 Version: 1.2
 Date:    03-28-2006
 
