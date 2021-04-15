@@ -4,6 +4,8 @@ Copyright (c) 2006, Martin Vorbrodt
 Version: 1.2
 Date:    03-28-2006
 
+SCSI FAQ: http://scsifaq.sitemux.net/
+
 
 
 Overview
